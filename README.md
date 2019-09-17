@@ -84,6 +84,80 @@ Rasa uses the concept of intents to describe how user messages should be categor
 - While in general more data helps to acheive better accuracies negatively. 
 - Hyperparameter optimization can help to cushion the negative effects, but the best solution is to reestablish the balanced dataset.
 
+## Entity Extraction
+
+- Pieces of information which helps a chatbot understand what specifically a user is asking about by recognising the structured data in the sentence.
+- Understanding the user's intent is only part of the problem. It is equally important to extract relevant information froma user's message, such as dates and addresses. This process of extracting the different required pieces of information is called entity recognition.
+
+- Entity recognition with Spacy language models: ner_spacy
+- Rule based entity recognition using Facebook's Duckling: ner_http_duckling
+- Training an extractor for custom entities: ner_crf
+
+#### SpaCy
+
+The spaCy library offers pretrained entity extractors. As with the word embeddings, only certain languages are supported. If our language is supported, the component `ner_spacy` is the recommended option to recognise entities like organization names, people's names, or places.
+
+#### Duckling
+
+Duckling is the rule-based entity extraction library developed by Facebook. If we want to extract any number of related information e.g amounts of money, dates, distances or durations.
+
+#### NER_CRF
+
+- Neither `ner_spacy` nor `ner_duckling` require you to annotate any of the training data. since they are either using pretrained classifiers(spacy) or rule-based approaches(Duckling).
+- The `ner_crf` component trains a `conditional random field` which is then used to tag entities in the user messages. 
+- Since this component is trained from scratch as part of the NLU pipeline, we have to annotate our training data ourself.
+- Provide enough examples (>20) per emtity so that the CRF can generalize and pick up the data
+- Annotate the training examples everywhere in the training data(even if the entity might not be relevant for the intent)
+
+#### Regular Expressions / Lookup Tables
+
+- To support the entity extraction of the `ner_crf` component, we can also use regular expressions or lookup tables.
+- Regular expressions match certain hard coded patterns, e.g[0-9]{5} would match 5 digit zip codes. 
+- Lookup tables are useful when your entity has a predefined set of values. The entity country can for example only have 195 different values.
+- To use regular expressions and/or lookup tables add the `intent_entity_featurizer_regex_component` before the `ner_crf` component in the pipeline. Then annotate the training data.
+
+
+
+## Acknowelgement 
+
+1) https://blog.rasa.com/rasa-nlu-in-depth-part-2-entity-recognition/
+2) https://blog.rasa.com/rasa-nlu-in-depth-part-1-intent-classification/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
