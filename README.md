@@ -139,8 +139,10 @@ Duckling is the rule-based entity extraction library developed by Facebook. If w
 
 - We provide training data in JSON file. Contains list of dictionaries called training examples
 
-`from rasa_nlu.converters import load_data
-training_data = load_data("./training_data.json")`
+```python
+from rasa_nlu.converters import load_data
+training_data = load_data("./training_data.json")
+```
 
 - training_data object contains a list of dictionaries called training examples
 - Each of these dictionaries contains example message, its intent and the list of entities found in the message
