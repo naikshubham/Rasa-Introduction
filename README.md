@@ -19,6 +19,12 @@ Rasa uses the concept of intents to describe how user messages should be categor
 - Pretrained Embeddings (Intent_classifier_sklearn)
 - Supervised Embeddings (Intent_classifier_tensorflow_embedding) 
 
+`restraunt_search` can be expressed in many different ways:
+- I'm hungry
+- Show me good pizza spots
+- I want to take my boyfriend out for sushi
+
+
 ### Pretrained Embeddings : Intent Classifier Sklearn
 
 - This classifier uses the spaCy library to load pretrained language models which then are used to represent each word in the user message as word embedding.
@@ -93,6 +99,19 @@ Rasa uses the concept of intents to describe how user messages should be categor
 - Rule based entity recognition using Facebook's Duckling: ner_http_duckling
 - Training an extractor for custom entities: ner_crf
 
+`Book a table for June 10th at a sushi restraunt in New York City`
+
+In a restraunt search example, extracting entities out of the above sentence include extracting `June 10th` as `date` , `sushi` as `restraunt` and `New York city` as a `location`.
+
+##### Beyond keywords : Context
+- Keywords don't work for entities we haven't seen before
+Use contextual clues:
+- Spelling
+- Capitalization
+- Words occuring before & after
+
+- Pattern recognition
+
 #### SpaCy
 
 The spaCy library offers pretrained entity extractors. As with the word embeddings, only certain languages are supported. If our language is supported, the component `ner_spacy` is the recommended option to recognise entities like organization names, people's names, or places.
@@ -115,6 +134,61 @@ Duckling is the rule-based entity extraction library developed by Facebook. If w
 - Regular expressions match certain hard coded patterns, e.g[0-9]{5} would match 5 digit zip codes. 
 - Lookup tables are useful when your entity has a predefined set of values. The entity country can for example only have 195 different values.
 - To use regular expressions and/or lookup tables add the `intent_entity_featurizer_regex_component` before the `ner_crf` component in the pipeline. Then annotate the training data.
+
+### Rasa data format
+
+- We provide training data in JSON file. Contains list of dictionaries called training examples
+
+`from rasa_nlu.converters import load_data
+training_data = load_data("./training_data.json")`
+
+- training_data object contains a list of dictionaries called training examples
+- Each of these dictionaries contains example message, its intent and the list of entities found in the message
+- We can convert one of the dictonaries to readable JSON using `json.dumps(data.training_examples[22], indent = 2))`
+- indent = 2, specifies the number of spaces to indent
+
+### Interpreter
+- The way to use RASA NLU in python code is to run interpreter object.
+- This contains the trained model for intents and entities
+- To use it pass a message to interpreter's `parse` function. `interpreter.parse(message)`
+- This returns a dictionary with the extracted intents and entities
+
+#### How to create an Interpreter
+- To train our model we create a configuration and a trainer
+- Creating a model:
+```python
+from rasa_nlu.config import RasaNLUConfig
+from rasa_nlu.model imort Trainer
+config = RasaNLUConfig(cmdline_args={"pipeline":"spacy_sklearn"})
+trainer = Trainer(config)
+interpreter = trainer.train(training_data)
+```
+- Here we used `spacy_sklearn` pipeline
+
+### Rasa pipelines
+
+- Rasa pipeline is the list of components used to process text
+- **nlp_spacy** --> initializes the spacy English model
+- **ner_crf** --> uses the conditional random field model to extract entities
+- **ner_synonyms** --> maps entities with the same meanings to the same key. eg. If we want to treat NYC and New York city as synonyms
+- **intent_featurizer_spacy** --> creates vector representation of sentences
+- **intent_classifier_sklearn** --> sklearn Support Vector Classifier
+
+- When the model is trained and used with this pipeline, these steps are performed automatically
+- Inorder to train a custom entity recognizer for our domain the recommended component is **`ner_crf`** 
+
+#### Conditional random fields
+- Machine learning model, popular for named entity recognition
+- Can perform well even with small training data
+
+#### Handling typos
+- One downside of word vectors is that if important words are misspelled then it's very hard for the classifier to correctly predict intents. 
+- And for many words there isn't any word vectors because they didnt appear in training corpus.
+- **RASA NLU can remedy this if we include `intent_featurizer_ngrams` component**
+- **This component looks at all the words in the training data for which there are'nt word vectors including miss spelled words, then it looks for sub words units  or character ngrams which are predective of the intent**
+- e.g if the word dollars is an important indicator of a price request, this component will pick up the sequence **`dolla`** as an important one.
+- We need to ensure that our training data contains this out-of-vocabulary words or miss spellings or else model won't be able to learn from them.
+
 
 
 
