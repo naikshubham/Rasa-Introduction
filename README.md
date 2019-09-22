@@ -284,6 +284,65 @@ I want burritos **`not`** sushi
 - Assume that "not" or "n't" just before an entity means user wants to exclude this
 - But would fail in cases like "I would rather skip the dinner then eating at sushi" or "I hate sushi" etc
 
+## Stateful Bots
+
+- Means bots have a memory.A additional piece of memory, a state-machine. A simple e.g is traffic light. When a event is received by traffic light, it changes its state red-to-green or green-to-yellow
+- Shopping is a typical use case where state-machine can simply the implementation of the bot.A user begins by browsing, once they select items we need to collect information from them like card details or shipping address.
+- To implement the state machines, we need some symbols to define the state and its commn to use integers for this purpose.
+
+#### Implementing a state machine (to order coffee)
+- Let's define 3 states :
+```python
+INIT = 0
+CHOOSE_COFFEE = 1
+ORDERED = 2
+```
+
+- Then we need to define some rules or events which switches between these states
+- e.g if we are in `INIT` state and user wants to order cofee then we need to push bot to `CHOOSE_COFFEE` state.
+
+- Once user confirms which coffee he wants to buy, with the specified coffee intent we place an order for them and move them in the `ORDERED_STATE`
+
+- We can define these rules in a dictionary, **for each key is a tuple of the current state and the expressed intent** and **each value is also a tuple of the next state and the message to the user** 
+
+```python
+policy_rules = {
+    (INIT, "order"): (CHOOSE_COFFEE, "ok, Columbian or Kenyan?"),
+    (CHOOSE_COFFEE, "specify_coffee"): 
+    (ORDERED, "perfect, the beans are on their way!"),
+}
+```
+
+#### Using the state machine
+- To use this state machine in our bot, we need to think of the scope of the state varaible. It should be outside the `respond` and `send_message` functions 
+- We define a interpret function which returns the intent for any given message.
+- `send_message` function returns a `new_state` value 
+- update the `state` with `send_message` output.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Acknowelgement 
 
