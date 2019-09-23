@@ -320,8 +320,12 @@ policy_rules = {
 - update the `state` with `send_message` output.
 
 
+### Tricks to build conversational flow, asking questions and queuing answers
 
+- As the bot becomes more sophisticated the number of states will go on increasing and there will be lot of rules for transitioning between them.
+- We need some tricks to reduce this complexity
 
+#### Reusbale patterns
 
 
 

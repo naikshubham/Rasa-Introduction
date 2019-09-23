@@ -192,6 +192,160 @@ interpreter = trainer.train(training_data)
 - We need to ensure that our training data contains this out-of-vocabulary words or miss spellings or else model won't be able to learn from them.
 
 
+## Virtual assistants
+
+- Common chatbot use cases include:
+1) Scheduling a meeting
+2) Booking a flight
+3) Searching a restraunt
+
+- Require information from outside world.
+- Need to interact with databases or APIs
+
+### ** Basic SQl **
+
+select * from restaurants;
+select name, rating from restaurnats;
+select name from restaurants where area = 'center' and pricerange = 'hi';
+
+- Python has a module called SQlite which let's us interact with SQl database
+
+```python
+import sqlite3
+conn = sqlite3.connect('hotels.db') # establish connection with database
+c = conn.cursor()                   # to execute queries
+c.execute("select * from hotels where area='south' and pricerange='hi'")
+c.fetchall()
+```
+
+### SQl injection
+#### bad idea
+```python
+query = "select name from restaurant where area='{}'".format(area)
+c.execute(query)
+```
+#### better
+```python
+t = (area, price)
+c.execute('select * from hotels where area=? and price=?', t)
+```
+
+### Exploring a DB with natural language
+
+- We want to generate queries that corresponds to the following kinds of messages
+
+** example messages**
+- Show me a great hotel
+- "i'm looking for a cheap hotel in the south of town"
+- "anywhere so long as it's central"
+
+- We dont know beforehand what criterias user will ask. So this adds a little more complexity while writing queries
+
+#### Parameters from text
+- let's extract query parameters from the query
+- We have an interprepter object which has an already trained RASA NlU model loaded.
+- We pass the message to `interpreter.parse(message)` to get the intents and entities.
+
+
+## Incremental slot filling and negation
+- First part is to add some memory to the bot so that the users can narrow down their search incrementally
+
+- The process of collecting the user's preferences during the conversation is called **slot filling**
+
+#### Basic memory
+
+- To add a basic version of the memory we can add parameters in a dictionary
+
+```python
+def respond(message, params):
+	# update params with entities in message
+	# run query
+	# pick response
+	return response, params
+
+# initialise params
+params = {}
+
+#message comes in
+response, params = respond(message, params)
+```
+
+- If the user has said he is looking for cheap hotels, we need to save price range=lo in the params dictionary
+- Tricky thing is to decide when to wipe the memory off and let the user start over
+
+## Negation
+
+- A simple approach that will work for most obvious cases bot is likely to see(not a general approach)
+- Split the sentences into phrases and see which entities has a word **no** infront of them
+e.g no I do**`n't`** want Sushi
+**`not`** sushi, maybe pizza?
+I want burritos **`not`** sushi
+
+- Assume that "not" or "n't" just before an entity means user wants to exclude this
+- But would fail in cases like "I would rather skip the dinner then eating at sushi" or "I hate sushi" etc
+
+## Stateful Bots
+
+- Means bots have a memory.A additional piece of memory, a state-machine. A simple e.g is traffic light. When a event is received by traffic light, it changes its state red-to-green or green-to-yellow
+- Shopping is a typical use case where state-machine can simply the implementation of the bot.A user begins by browsing, once they select items we need to collect information from them like card details or shipping address.
+- To implement the state machines, we need some symbols to define the state and its commn to use integers for this purpose.
+
+#### Implementing a state machine (to order coffee)
+- Let's define 3 states :
+```python
+INIT = 0
+CHOOSE_COFFEE = 1
+ORDERED = 2
+```
+
+- Then we need to define some rules or events which switches between these states
+- e.g if we are in `INIT` state and user wants to order cofee then we need to push bot to `CHOOSE_COFFEE` state.
+
+- Once user confirms which coffee he wants to buy, with the specified coffee intent we place an order for them and move them in the `ORDERED_STATE`
+
+- We can define these rules in a dictionary, **for each key is a tuple of the current state and the expressed intent** and **each value is also a tuple of the next state and the message to the user** 
+
+```python
+policy_rules = {
+    (INIT, "order"): (CHOOSE_COFFEE, "ok, Columbian or Kenyan?"),
+    (CHOOSE_COFFEE, "specify_coffee"): 
+    (ORDERED, "perfect, the beans are on their way!"),
+}
+```
+
+#### Using the state machine
+- To use this state machine in our bot, we need to think of the scope of the state varaible. It should be outside the `respond` and `send_message` functions 
+- We define a interpret function which returns the intent for any given message.
+- `send_message` function returns a `new_state` value 
+- update the `state` with `send_message` output.
+
+
+### Tricks to build conversational flow, asking questions and queuing answers
+
+- As the bot becomes more sophisticated the number of states will go on increasing and there will be lot of rules for transitioning between them.
+- We need some tricks to reduce this complexity
+
+#### Reusbale patterns
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Acknowelgement 
