@@ -1,0 +1,37 @@
+%[greet]
+    ~[hi]
+%[goodbye]
+    ~[bye]
+%[affirm]
+    ~[ok]
+~[ok]
+    ok
+    okay
+    k
+    fine
+    noted
+    agreed
+    hmmmm
+    yes
+~[hi]
+    hi
+    hey
+    howdy
+    ahoy
+    hello
+    morning
+    afternoon
+    evening
+    greetings
+    welcome
+    how are you
+    what's up
+    holla
+~[bye]
+    bye
+    goodbye
+    good bye
+    farewell
+    bye bye
+    see you
+    see ya
