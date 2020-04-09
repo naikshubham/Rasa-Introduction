@@ -1,0 +1,86 @@
+Rasa story format:
+1) ## nameofthestory
+2) newline -> end of the story 
+3) * -> messages sent by the user in the format "intent{'entity_1':'value' ,'entity_2':'value'}
+4) - -> actions executed by the bot
+5) event -> events are returned by an action are on lines after the action .e.g if action returns a Slotset event "slot{'slot_name':'value'}"
+
+Actions
+- Two types of actions : `utterances` and `custom_actions`
+- `Utterances` : Hard coded messages that bot can respond with
+- `custom_actions` : Involves custom code being executed
+*************************
+- All actions(both utterances and custom_actions) are shown as lines starting with "-", followed by the name of the action
+- All utterances must begin with the prefix `utter_` & must match the name of the template defined in the domain
+- For custom actions, the action name is the string we choose to return from the `name` method of the custom action class.There is no restriction for naming
+custom actions(unlike utterances).The best practise is to prefix the name with `action_`
+
+Events:
+- Conversations in rasa are represented as sequence of events.
+
+Slots:
+- Slots hold information we want to keep track of during a conversation. A categorical slot called risk_level would be defined like this:
+**************************
+slots:
+	risk_level:
+		type:categorical
+		values:
+		- low
+		- medium
+		- high
+
+General Purpose events:
+1) set a slot: Event to set a slot on a tracker
+2) restart a conversation : resets anything logged on the tracker 
+   Conversation should start over and history wiped.Instead of deleting all events,this event can be used to reset the trackers state(e.g ignoring any past user
+   messages and resetting all the slots)
+3) Reset all slots : Resets all the slots of a conversation 
+	All slots are reset to their initial values. If we want to keep the dialogue history and only want to reset the slots, we can use this event to set all the 
+	slots to their initial values 
+4) Schedule a reminder : Schedule an action to be executed in the future.
+5) Pause a conversation: stops a bot from responding to messages.Action prediction will be halted until resumed.
+6) Resume a conversation : resumes a previously paused conversation 
+7) Force a follwup action : instead of predicting the next action, force the next action to be a fixed one 
+
+Automatically tracked event 
+1) User sent message     : Message a user sent to the bot 
+2) Bot responded message : message a bot sent to the user 
+3) Undo a user message   : Undoes all side effects that happened after the last user message (including the user event of the message).
+4) Undo an action        : Undoes all side effects that happened after the last action (including the action event of the action).
+5) Log an executed action: logs an action the bot executed to the conversation.Events that action created are logged separately
+6) Start a new conversation session : marks the beginning of the new conversation session.
+
+
+Actions 
+Actions are the things bot runs in response to user input.There are 4 kinds of actions in rasa:
+1) Utterance actions: start with `utter_` and send a specific message to the user 
+2) Retrieval actions: start with `respond_` and send a message selected by a retrieval model
+3) Custom actions : run arbitrary code and send any number of messages 
+4) Default actions : e.g. action_listen, action_restart, action_default_fallback 
+
+
+Utterance action : to define an utterance action, add an utterance template to the domain file that start with `utter_`:
+  
+Domains
+- Domain defines the universe in which the assistant operates. It specifies the intent, entities, slots and actions bot should know about.
+  It can also include templates for the things bot can say.
+- Slots hold information we want to keep track of during a conversation.
+- Actions are things the bot can actually do: respond to a user; make an external api call; query a database; 
+
+Custom actions and slots 
+- To reference slots in the domain we need to reference them by thier module_path. To reference custom actions use their name.
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
